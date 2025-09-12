@@ -4,7 +4,9 @@ import { StatsSection } from '@/components/StatsSection';
 import { CoursesSection } from '@/components/CoursesSection';
 import { CTASection } from '@/components/CTASection';
 
+
 const Index = () => {
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -19,7 +21,11 @@ const Index = () => {
       <CoursesSection />
       
       {/* CTA Section */}
-      <CTASection />
+      
+
+        <CTASection />
+     
+      
       
       {/* Footer */}
       <footer className="border-t border-border/50 py-12 bg-muted/20">

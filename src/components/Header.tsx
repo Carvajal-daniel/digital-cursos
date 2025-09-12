@@ -2,11 +2,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Settings, Menu, X } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdmin = location.pathname === '/admin';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAdminLogin, setIsAdminLogin] = useState(false);
 
   return (
     <header className="border-b border-border/50 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -61,7 +64,10 @@ export function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Link to="/admin">
+   
+           {
+            isAdminLogin ? (
+               <Link to="/admin">
               <Button
                 variant={isAdmin ? 'default' : 'ghost'}
                 size="sm"
@@ -71,12 +77,23 @@ export function Header() {
                 <span>Admin</span>
               </Button>
             </Link>
+            )
+            : (
+              <Link to="/auth">
+              <Button
+                variant={isAdmin ? 'default' : 'ghost'}
+                size="sm"
+                className="flex items-center space-x-2 bg-white text-black"
+              >
+                <Settings className="h-4 w-4" />
+                <span>Entrar</span>
+              </Button>
+            </Link>
+            )
+           }
             
-            <Button variant="outline" size="sm">
-              Entrar
-            </Button>
-            
-            <Button variant="hero" size="sm">
+       
+             <Button variant="hero" size="sm" onClick={() => navigate('/auth')}>
               Começar grátis
             </Button>
           </div>
@@ -140,7 +157,7 @@ export function Header() {
                   </Button>
                 </Link>
                 
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => { navigate('/auth'); setIsMenuOpen(false); }}>
                   Entrar
                 </Button>
                 
@@ -152,6 +169,7 @@ export function Header() {
           </div>
         )}
       </div>
+      
     </header>
   );
 }
