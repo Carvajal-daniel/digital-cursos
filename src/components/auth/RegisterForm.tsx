@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
 interface RegisterFormProps {
@@ -18,6 +19,7 @@ export const RegisterForm = ({ onToggleMode }: RegisterFormProps) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,8 +64,10 @@ export const RegisterForm = ({ onToggleMode }: RegisterFormProps) => {
 
         if (loginResponse.ok) {
           const loginData = await loginResponse.json();
-          localStorage.setItem("token", loginData.token || "authenticated");
-          localStorage.setItem("user", JSON.stringify(loginData.user || { name, email }));
+          const userData = loginData.user || { name, email };
+          const token = loginData.token || "authenticated";
+          
+          login(userData, token);
           navigate("/");
         } else {
           onToggleMode(); // Switch to login form

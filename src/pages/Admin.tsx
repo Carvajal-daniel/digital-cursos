@@ -1,20 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { CourseCard } from '@/components/CourseCard';
 import { CourseForm } from '@/components/CourseForm';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Plus, Search } from 'lucide-react';
 import { useCourses } from '@/hooks/use-courses';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import { Course, CourseFormData } from '@/types/course';
-import { Plus, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 
 const Admin = () => {
   const { courses, addCourse, updateCourse, deleteCourse } = useCourses();
   const { toast } = useToast();
+  const { role, isLoading } = useAuth();
+  const navigate = useNavigate();
+
   const [showForm, setShowForm] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Protege rota: só admin pode acessar
+  useEffect(() => {
+    if (!isLoading && role !== 'admin') {
+      navigate('/');
+    }
+  }, [role, isLoading, navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <span>Carregando...</span>
+      </div>
+    );
+  }
 
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,7 +98,6 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
@@ -89,7 +108,6 @@ const Admin = () => {
               Gerencie seus cursos, adicione novos conteúdos e monitore o desempenho.
             </p>
           </div>
-          
           {!showForm && (
             <Button
               variant="hero"
@@ -112,7 +130,6 @@ const Admin = () => {
           </div>
         ) : (
           <>
-            {/* Search Bar */}
             <div className="mb-8">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -133,14 +150,12 @@ const Admin = () => {
                 </div>
                 <div className="text-muted-foreground">Total de Cursos</div>
               </div>
-              
               <div className="bg-card border border-border rounded-lg p-6">
                 <div className="text-2xl font-bold text-foreground mb-1">
                   {courses.reduce((acc, course) => acc + course.studentsCount, 0).toLocaleString()}
                 </div>
                 <div className="text-muted-foreground">Total de Estudantes</div>
               </div>
-              
               <div className="bg-card border border-border rounded-lg p-6">
                 <div className="text-2xl font-bold text-foreground mb-1">
                   R$ {courses.reduce((acc, course) => acc + (course.price * course.studentsCount), 0).toLocaleString()}
@@ -158,10 +173,7 @@ const Admin = () => {
                     {searchTerm ? 'Nenhum curso encontrado' : 'Nenhum curso criado'}
                   </h3>
                   <p className="text-muted-foreground mb-6">
-                    {searchTerm 
-                      ? 'Tente ajustar os termos de busca.' 
-                      : 'Comece criando seu primeiro curso.'
-                    }
+                    {searchTerm ? 'Tente ajustar os termos de busca.' : 'Comece criando seu primeiro curso.'}
                   </p>
                   {!searchTerm && (
                     <Button
@@ -181,7 +193,7 @@ const Admin = () => {
                   <CourseCard
                     key={course.id}
                     course={course}
-                    isAdmin={true}
+                    isAdmin={role === 'admin'}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                   />

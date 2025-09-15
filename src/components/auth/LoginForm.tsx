@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 
 interface LoginFormProps {
@@ -16,6 +17,7 @@ export const LoginForm = ({ onToggleMode }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,20 +30,28 @@ export const LoginForm = ({ onToggleMode }: LoginFormProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }), // `role` removido daqui
       });
 
       if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem("token", data.token || "authenticated");
-        localStorage.setItem("user", JSON.stringify(data.user || { email }));
-        
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo de volta!",
-        });
-        
-        navigate("/");
+       const data = await response.json();
+
+  const userData = {
+    name: data.user?.name || email.split('@')[0],
+    email: data.user?.email || email,
+    role: data.user?.role || data.role || "user", // 👈 garante que role vem junto
+  };
+
+  const token = data.token || "authenticated";
+
+  login(userData, token);  // 👈 agora salva user + role + token
+
+  toast({
+    title: "Login realizado com sucesso!",
+    description: "Bem-vindo de volta!",
+  });
+
+  navigate("/");
       } else {
         const errorData = await response.json();
         toast({
@@ -60,7 +70,7 @@ export const LoginForm = ({ onToggleMode }: LoginFormProps) => {
       setIsLoading(false);
     }
   };
-
+  
   return (
     <>
     <Card className="w-[400px] bg-card/50 backdrop-blur-xl border-border/50 shadow-card">
@@ -128,6 +138,5 @@ export const LoginForm = ({ onToggleMode }: LoginFormProps) => {
       </CardContent>
     </Card>
     </>
-
   );
 };
