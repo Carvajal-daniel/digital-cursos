@@ -69,13 +69,16 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {/* User info and logout */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <User className="h-4 w-4" />
-                    <span>Olá, {user?.name}</span>
-                  </div>
-                  <Button
+              {/* User info and logout */}
+<div className="flex items-center space-x-3">
+  <Link 
+    to="/profile" 
+    className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+  >
+    <User className="h-4 w-4" />
+    <span>Olá, {user?.name}</span>
+  </Link>
+  <Button
                     variant="ghost"
                     size="sm"
                     onClick={logout}
@@ -173,10 +176,14 @@ export function Header() {
                 {isAuthenticated ? (
                   <>
                     {/* User info */}
-                    <div className="flex items-center space-x-2 text-sm text-muted-foreground px-2 py-1">
-                      <User className="h-4 w-4" />
-                      <span>Olá, {user?.name}</span>
-                    </div>
+                    <Link 
+  to="/profile" 
+  className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer px-2 py-1"
+  onClick={() => setIsMenuOpen(false)}
+>
+  <User className="h-4 w-4" />
+  <span>Olá, {user?.name}</span>
+</Link>
 
                     {/* Admin button if on admin page */}
                     {isAdmin && (
