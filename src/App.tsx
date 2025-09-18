@@ -9,6 +9,8 @@ import CourseDetails from "./pages/CourseDetails";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import ChangePassword from "./pages/ChangePassword";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
+          <Route path="/profile/password" element={<ChangePassword />} />
           <Route path="/admin" element={<Admin />} />
           
           <Route path="/auth" element={<Auth />} />
