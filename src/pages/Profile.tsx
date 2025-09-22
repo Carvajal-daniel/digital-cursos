@@ -2,27 +2,30 @@ import { Header } from '@/components/Header';
 import { useAuth } from '@/hooks/use-auth';
 import { useUserProfile } from '@/hooks/use-user-profile';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { User, Mail, Calendar, Shield, Settings, ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { User, Mail, Calendar, Shield, Settings, ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Course } from '@/types/course';
 
 const Profile = () => {
   const { user, role, isAuthenticated, isLoading: authLoading } = useAuth();
   const { userProfile, isLoading: profileLoading, error, refetch } = useUserProfile();
   const { toast } = useToast();
   const navigate = useNavigate();
+  
+  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
 
-  // Protege a rota: só usuários logados podem acessar
+  // Protege a rota
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       navigate('/auth');
     }
   }, [isAuthenticated, authLoading, navigate]);
 
-  // Mostrar toast de erro se houver
+  // Mostrar toast de erro
   useEffect(() => {
     if (error) {
       toast({
@@ -32,6 +35,21 @@ const Profile = () => {
       });
     }
   }, [error, toast]);
+
+  // Carrega cursos do localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('enrolledCourses');
+    if (stored) {
+      setEnrolledCourses(JSON.parse(stored));
+    }
+  }, []);
+
+  // Calcula horas estudadas
+  const totalHours = enrolledCourses.reduce((sum, course) => {
+    const match = course.duration.match(/(\d+)\s?h/); // pega número de horas do formato "10h"
+    if (match) return sum + parseInt(match[1], 10);
+    return sum;
+  }, 0);
 
   if (authLoading || profileLoading) {
     return (
@@ -49,9 +67,7 @@ const Profile = () => {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Será redirecionado pelo useEffect
-  }
+  if (!isAuthenticated) return null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,12 +87,10 @@ const Profile = () => {
         {/* Header do Perfil */}
         <div className="mb-8">
           <div className="flex items-center space-x-6">
-            {/* Avatar */}
             <div className="w-24 h-24 bg-gradient-primary rounded-full flex items-center justify-center">
               <User className="h-12 w-12 text-white" />
             </div>
             
-            {/* Informações Básicas */}
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 {userProfile?.name || user?.name}
@@ -121,8 +135,7 @@ const Profile = () => {
                         month: 'long', 
                         year: 'numeric' 
                       })
-                    : 'Janeiro 2024'
-                  }
+                    : 'Janeiro 2024'}
                 </span>
               </div>
             </CardContent>
@@ -139,7 +152,7 @@ const Profile = () => {
             <CardContent className="space-y-3">
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Cursos Inscritos</span>
-                <span className="font-semibold">0</span>
+                <span className="font-semibold">{enrolledCourses.length}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Cursos Concluídos</span>
@@ -147,7 +160,7 @@ const Profile = () => {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Horas Estudadas</span>
-                <span className="font-semibold">0h</span>
+                <span className="font-semibold">{totalHours}h</span>
               </div>
             </CardContent>
           </Card>
